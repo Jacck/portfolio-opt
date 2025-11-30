@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCG Portfolio Optimization - FIXED</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .container { 
+            max-width: 1600px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+            padding: 30px; 
+        }
+        h1 { 
+            color: #2c3e50; 
+            margin-bottom: 10px; 
+            font-size: 2.5em; 
+        }
+        .subtitle { 
+            color: #7f8c8d; 
+            margin-bottom: 30px; 
+            font-size: 1.1em; 
+            line-height: 1.6;
+        }
+        .section { 
+            margin-bottom: 30px; 
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .section h2 { 
+            color: #2c3e50; 
+            margin-bottom: 15px; 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 8px; 
+        }
+        .formula {
+            background: #ecf0f1;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        input[type="number"], input[type="text"], input[type="checkbox"] {
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        input[type="number"] {
+            width: 90px;
+        }
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .param-input {
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+        }
+        .param-input label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+        .solve-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        .solve-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+        .solve-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .results {
+            background: #e8f8f5;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #27ae60;
+        }
+        .results h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .result-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result-card .label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        .result-card .value {
+            font-size: 1.3em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .selected-project {
+            background: #d5f4e6 !important;
+            border-left: 4px solid #27ae60;
+        }
+        .not-selected {
+            opacity: 0.6;
+        }
+        .add-project-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 10px 5px;
+        }
+        .add-project-btn:hover {
+            background: #2980b9;
+        }
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box strong {
+            color: #856404;
+        }
+        .progress {
+            margin: 10px 0;
+            color: #3498db;
+            font-weight: 600;
+        }
+        .vcg-highlight {
+            background: #e3f2fd !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Project Portfolio Optimization</h1>
+        <p class="subtitle">
+    		Based on mechanism design
+	</p>
+
+        <div class="section">
+            <h2>Mechanism description</h2>
+            <div class="formula">
+    		This optimization selects the combination of projects that delivers 		the highest overall benefit 
+   		while staying within the total budget. Each project contributes 		value, consumes budget, and 
+    		imposes shared load on the organization. The algorithm compares all 		feasible combinations, 
+    		evaluates their total value after costs, and chooses the best 			portfolio. Optional payments 
+    		estimate each project's impact on others.
+	</div>
+
+            
+            <div class="param-input">
+                <label>
+                    <input type="checkbox" id="enableVCG" checked>
+                    Enable VCG Payments
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Parameters</h2>
+            <div class="param-input">
+                <label>Budget (B_max):</label>
+                <input type="number" id="budgetCap" value="15" step="0.5" min="0">
+            </div>
+            <div class="param-input">
+                <label>Shadow Price (λ):</label>
+                <input type="number" id="lambda" value="0.5" step="0.1" min="0">
+            </div>
+            <div class="param-input">
+                <label>AS Parameter (a):</label>
+                <input type="number" id="costParam" value="0.01" step="0.001" min="0">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Projects</h2>
+            <button class="add-project-btn" onclick="addProject()">+ Add Project</button>
+            <button class="add-project-btn" onclick="loadExample()">Load Example (4 projects)</button>
+            
+            <table id="projectsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value (v)</th>
+                        <th>Budget (b)</th>
+                        <th>Load</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="projectsBody"></tbody>
+            </table>
+        </div>
+
+        <button class="solve-btn" id="solveBtn" onclick="solve()">Optimize Portfolio</button>
+        <div id="progress"></div>
+        <div id="results"></div>
+    </div>
+
+    <script src="highs_wasm.js"></script>
+    <script>
+        let Module;
+        let projectCounter = 0;
+        
+        createModule().then(function(m) {
+            Module = m;
+            console.log('HiGHS loaded');
+            loadExample();
+        });
+
+        function addProject(name = '', value = 10, budget = 5, load = 10) {
+            const tbody = document.getElementById('projectsBody');
+            const row = tbody.insertRow();
+            const id = projectCounter++;
+            
+            row.innerHTML = `
+                <td><input type="text" value="${name || 'Project ' + (id + 1)}" style="width: 140px;" id="name_${id}"></td>
+                <td><input type="number" value="${value}" step="0.1" min="0" id="value_${id}"></td>
+                <td><input type="number" value="${budget}" step="0.1" min="0" id="budget_${id}"></td>
+                <td><input type="number" value="${load}" step="0.1" min="0" id="load_${id}"></td>
+                <td><button class="remove-btn" onclick="removeProject(this)">Remove</button></td>
+            `;
+            row.dataset.id = id;
+        }
+
+        function removeProject(btn) {
+            btn.closest('tr').remove();
+        }
+
+        function loadExample() {
+            document.getElementById('projectsBody').innerHTML = '';
+            projectCounter = 0;
+            // ONLY 4 PROJECTS
+            addProject('High-Value Core', 10.0, 5.0, 10.0);
+            addProject('Strategic Initiative', 8.0, 4.0, 6.0);
+            addProject('Innovation Lab', 7.0, 3.0, 8.0);
+            addProject('Quick Win', 4.0, 2.0, 2.0);
+        }
+
+        function getProjects() {
+            const rows = document.getElementById('projectsBody').rows;
+            const projects = [];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const id = row.dataset.id;
+                projects.push({
+                    name: document.getElementById(`name_${id}`).value,
+                    value: parseFloat(document.getElementById(`value_${id}`).value) || 0,
+                    budget: parseFloat(document.getElementById(`budget_${id}`).value) || 0,
+                    load: parseFloat(document.getElementById(`load_${id}`).value) || 0
+                });
+            }
+            return projects;
+        }
+
+        function computeAS(loads, a) {
+            const L = loads.reduce((sum, x) => sum + x, 0);
+            if (L === 0) return loads.map(() => 0);
+            return loads.map(x => a * L * x);
+        }
+
+        function branchAndBound(welfares, budgets, Bmax, maxNodes = 1000) {
+            const n = welfares.length;
+            
+            if (n === 0 || welfares.every(w => w <= 0)) {
+                return { solution: new Array(n).fill(false), value: 0, nodesExplored: 0 };
+            }
+            
+            let bestSolution = null;
+            let bestValue = 0;
+            let nodesExplored = 0;
+            
+            const queue = [{ fixed: [], lowerBound: 0, upperBound: Infinity }];
+            
+            while (queue.length > 0 && nodesExplored < maxNodes) {
+                queue.sort((a, b) => b.upperBound - a.upperBound);
+                const node = queue.shift();
+                nodesExplored++;
+                
+                const lpResult = solveLPWithFixed(welfares, budgets, Bmax, node.fixed);
+                
+                if (!lpResult.feasible) continue;
+                
+                const isBinary = lpResult.solution.every(x => x < 0.0001 || x > 0.9999);
+                
+                if (isBinary) {
+                    const value = lpResult.value;
+                    if (value > bestValue) {
+                        bestValue = value;
+                        bestSolution = lpResult.solution.map(x => x > 0.5);
+                    }
+                } else {
+                    const fracIdx = lpResult.solution.findIndex(x => x > 0.0001 && x < 0.9999);
+                    if (fracIdx >= 0) {
+                        queue.push({
+                            fixed: [...node.fixed, {index: fracIdx, value: 0}],
+                            upperBound: lpResult.value
+                        });
+                        queue.push({
+                            fixed: [...node.fixed, {index: fracIdx, value: 1}],
+                            upperBound: lpResult.value
+                        });
+                    }
+                }
+                
+                const validQueue = queue.filter(n => n.upperBound > bestValue);
+                queue.length = 0;
+                queue.push(...validQueue);
+            }
+            
+            return {
+                solution: bestSolution || new Array(n).fill(false),
+                value: bestValue,
+                nodesExplored: nodesExplored
+            };
+        }
+
+        function solveLPWithFixed(welfares, budgets, Bmax, fixed) {
+            const n = welfares.length;
+            
+            try {
+                const solver = new Module.HiGHSSolver();
+                solver.setMaximize(true);
+                
+                const col_cost = new Module.VectorDouble();
+                const col_lower = new Module.VectorDouble();
+                const col_upper = new Module.VectorDouble();
+                const row_lower = new Module.VectorDouble();
+                const row_upper = new Module.VectorDouble();
+                const a_start = new Module.VectorInt();
+                const a_index = new Module.VectorInt();
+                const a_value = new Module.VectorDouble();
+                
+                let adjustedBmax = Bmax;
+                let adjustedWelfare = 0;
+                
+                for (const fix of fixed) {
+                    if (fix.value === 1) {
+                        adjustedBmax -= budgets[fix.index];
+                        adjustedWelfare += welfares[fix.index];
+                    }
+                }
+                
+                for (let i = 0; i < n; i++) {
+                    const isFixed = fixed.find(f => f.index === i);
+                    if (isFixed) {
+                        col_cost.push_back(0);
+                        col_lower.push_back(isFixed.value);
+                        col_upper.push_back(isFixed.value);
+                    } else {
+                        col_cost.push_back(-welfares[i]);
+                        col_lower.push_back(0);
+                        col_upper.push_back(1);
+                    }
+                }
+                
+                row_lower.push_back(-1e30);
+                row_upper.push_back(adjustedBmax);
+                
+                a_start.push_back(0);
+                for (let i = 0; i < n; i++) {
+                    const isFixed = fixed.find(f => f.index === i);
+                    if (!isFixed || isFixed.value === 1) {
+                        a_start.push_back(a_start.get(a_start.size() - 1) + 1);
+                        a_index.push_back(0);
+                        a_value.push_back(budgets[i]);
+                    } else {
+                        a_start.push_back(a_start.get(a_start.size() - 1));
+                    }
+                }
+                
+                solver.setupLP(n, 1, col_cost, col_lower, col_upper,
+                              row_lower, row_upper, a_start, a_index, a_value);
+                
+                const status = solver.solve();
+                
+                let result;
+                if (status === 'Optimal') {
+                    const solution = solver.getSolution();
+                    const objValue = solver.getObjectiveValue();
+                    const sol = [];
+                    for (let i = 0; i < n; i++) {
+                        sol.push(solution.get(i));
+                    }
+                    result = {
+                        feasible: true,
+                        solution: sol,
+                        value: -objValue + adjustedWelfare
+                    };
+                } else {
+                    result = {feasible: false};
+                }
+                
+                solver.delete();
+                col_cost.delete();
+                col_lower.delete();
+                col_upper.delete();
+                row_lower.delete();
+                row_upper.delete();
+                a_start.delete();
+                a_index.delete();
+                a_value.delete();
+                
+                return result;
+                
+            } catch (error) {
+                console.error('LP solve error:', error);
+                return {feasible: false};
+            }
+        }
+
+        // FIXED: VCG with AS recalculation
+        function computeVCGPayments(projects, values, budgets, loads, lambda, a, AS, Bmax, W_opt, selected) {
+            const n = projects.length;
+            const payments = [];
+            
+            const welfares = values.map((v, i) => v - lambda * budgets[i] - AS[i]);
+            
+            for (let i = 0; i < n; i++) {
+                const w_i = selected[i] ? welfares[i] : 0;
+                
+                // Remove project i
+                const values_minus_i = values.filter((_, idx) => idx !== i);
+                const budgets_minus_i = budgets.filter((_, idx) => idx !== i);
+                const loads_minus_i = loads.filter((_, idx) => idx !== i);
+                
+                // CRITICAL: Recalculate AS costs
+                const AS_minus_i = computeAS(loads_minus_i, a);
+                
+                // Recalculate welfares with new AS
+                const welfares_minus_i = values_minus_i.map((v, j) => 
+                    v - lambda * budgets_minus_i[j] - AS_minus_i[j]
+                );
+                
+                // Solve without project i
+                const result_minus_i = branchAndBound(welfares_minus_i, budgets_minus_i, Bmax);
+                const W_minus_i = result_minus_i.value;
+                
+                // VCG payment
+                const p_i = W_minus_i - (W_opt - w_i);
+                const net_u = w_i - p_i;
+                
+                payments.push({
+                    index: i,
+                    selected: selected[i],
+                    welfare: w_i,
+                    vcg_payment: p_i,
+                    net_utility: net_u,
+                    W_minus_i: W_minus_i
+                });
+            }
+            
+            return payments;
+        }
+
+        function solve() {
+            if (!Module) {
+                alert('HiGHS not loaded!');
+                return;
+            }
+
+            const projects = getProjects();
+            if (projects.length === 0) {
+                alert('Add at least one project!');
+                return;
+            }
+
+            const Bmax = parseFloat(document.getElementById('budgetCap').value);
+            const lambda = parseFloat(document.getElementById('lambda').value);
+            const a = parseFloat(document.getElementById('costParam').value);
+            const enableVCG = document.getElementById('enableVCG').checked;
+
+            const values = projects.map(p => p.value);
+            const budgets = projects.map(p => p.budget);
+            const loads = projects.map(p => p.load);
+
+            const AS = computeAS(loads, a);
+            const welfares = values.map((v, i) => v - lambda * budgets[i] - AS[i]);
+
+            document.getElementById('solveBtn').disabled = true;
+            const n = projects.length;
+            const totalSolves = enableVCG ? n + 1 : 1;
+            document.getElementById('progress').innerHTML = 
+                `<div class="progress">Solving ${totalSolves} optimization problems...</div>`;
+
+            setTimeout(() => {
+                const result = branchAndBound(welfares, budgets, Bmax);
+                
+                let payments = null;
+                if (enableVCG) {
+                    document.getElementById('progress').innerHTML = 
+                        `<div class="progress">Computing VCG payments (with AS recalculation)...</div>`;
+                    
+                    setTimeout(() => {
+                        payments = computeVCGPayments(projects, values, budgets, loads, lambda, a, AS, Bmax, result.value, result.solution);
+                        
+                        document.getElementById('solveBtn').disabled = false;
+                        document.getElementById('progress').innerHTML = 
+                            `<div class="progress">Complete!</div>`;
+                        
+                        display(projects, result.solution, result.value, AS, lambda, Bmax, a, loads, result.nodesExplored, payments);
+                    }, 100);
+                } else {
+                    document.getElementById('solveBtn').disabled = false;
+                    document.getElementById('progress').innerHTML = 
+                        `<div class="progress">Complete!</div>`;
+                    
+                    display(projects, result.solution, result.value, AS, lambda, Bmax, a, loads, result.nodesExplored, null);
+                }
+            }, 100);
+        }
+
+        function display(projects, selected, welfare, AS, lambda, Bmax, a, loads, nodes, payments) {
+            const n = projects.length;
+            const used = projects.reduce((s, p, i) => s + (selected[i] ? p.budget : 0), 0);
+            const value = projects.reduce((s, p, i) => s + (selected[i] ? p.value : 0), 0);
+            const L = loads.reduce((s, x) => s + x, 0);
+
+            let html = `<div class="results"><h3>Results</h3><div class="result-grid">`;
+            html += `<div class="result-card"><div class="label">W_opt</div><div class="value">${welfare.toFixed(3)}</div></div>`;
+            html += `<div class="result-card"><div class="label">Budget</div><div class="value">${used.toFixed(2)}/${Bmax}</div></div>`;
+            html += `<div class="result-card"><div class="label">Selected</div><div class="value">${selected.filter(x=>x).length}/${n}</div></div>`;
+            html += `<div class="result-card"><div class="label">Value</div><div class="value">${value.toFixed(2)}</div></div>`;
+            
+            if (payments) {
+                const totP = payments.reduce((s, p) => s + (p.selected ? p.vcg_payment : 0), 0);
+                const totN = payments.reduce((s, p) => s + p.net_utility, 0);
+                html += `<div class="result-card vcg-highlight"><div class="label">VCG Payments</div><div class="value">${totP.toFixed(3)}</div></div>`;
+                html += `<div class="result-card vcg-highlight"><div class="label">Net Utility</div><div class="value">${totN.toFixed(3)}</div></div>`;
+            }
+            
+            html += `</div><h3>Details</h3><table><thead><tr><th>Project</th><th>Sel</th><th>Value</th><th>Budget</th><th>Load</th><th>AS</th><th>Welfare</th>`;
+            if (payments) html += `<th>W_{-i}</th><th>VCG Pay</th><th>Net Util</th>`;
+            html += `</tr></thead><tbody>`;
+
+            for (let i = 0; i < n; i++) {
+                const w = projects[i].value - lambda * projects[i].budget - AS[i];
+                const cls = selected[i] ? 'selected-project' : 'not-selected';
+                const sel = selected[i] ? '✓' : '✗';
+                
+                html += `<tr class="${cls}"><td><strong>${projects[i].name}</strong></td><td>${sel}</td>`;
+                html += `<td>${projects[i].value.toFixed(2)}</td><td>${projects[i].budget.toFixed(2)}</td>`;
+                html += `<td>${projects[i].load.toFixed(1)}</td><td>${AS[i].toFixed(3)}</td><td>${w.toFixed(3)}</td>`;
+                
+                if (payments) {
+                    const p = payments[i];
+                    html += `<td>${p.W_minus_i.toFixed(3)}</td>`;
+                    html += `<td${p.selected?' class="vcg-highlight"':''}>${p.vcg_payment.toFixed(3)}</td>`;
+                    html += `<td${p.selected?' class="vcg-highlight"':''}>${p.net_utility.toFixed(3)}</td>`;
+                }
+                
+                html += `</tr>`;
+            }
+
+            html += `</tbody></table></div>`;
+            document.getElementById('results').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
